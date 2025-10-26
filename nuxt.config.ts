@@ -9,10 +9,6 @@ export default defineNuxtConfig({
     enabled: true
   },
 
-  typescript: {
-    typeCheck: true
-  },
-
   css: ['~/assets/css/main.css'],
 
   routeRules: {
@@ -20,6 +16,10 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-01-15',
+
+  typescript: {
+    typeCheck: true
+  },
 
   eslint: {
     config: {
