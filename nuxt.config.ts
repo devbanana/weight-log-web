@@ -9,6 +9,10 @@ export default defineNuxtConfig({
     enabled: true
   },
 
+  typescript: {
+    typeCheck: true
+  },
+
   css: ['~/assets/css/main.css'],
 
   routeRules: {
