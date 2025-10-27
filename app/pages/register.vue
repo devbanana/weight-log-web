@@ -6,11 +6,18 @@ const state = reactive({
   password_confirmation: ''
 })
 
-async function handleRegister () {
+async function handleRegister() {
+  const { $api } = useNuxtApp()
+
   try {
-    await $fetch('/register', {
+    await $api('/auth/register', {
       method: 'POST',
-      body: state
+      body: {
+        name: state.name,
+        email: state.email,
+        password: state.password,
+        password_confirmation: state.password_confirmation
+      }
     })
 
     // NOTE: Laravel Fortify may redirect on successful registration.
@@ -42,15 +49,15 @@ async function handleRegister () {
         class="space-y-4"
         @submit="handleRegister"
       >
-        <UFormGroup
+        <UFormField
           label="Name"
           name="name"
           required
         >
           <UInput v-model="state.name" />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup
+        <UFormField
           label="Email"
           name="email"
           required
@@ -59,9 +66,9 @@ async function handleRegister () {
             v-model="state.email"
             type="email"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup
+        <UFormField
           label="Password"
           name="password"
           required
@@ -70,9 +77,9 @@ async function handleRegister () {
             v-model="state.password"
             type="password"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup
+        <UFormField
           label="Confirm Password"
           name="password_confirmation"
           required
@@ -81,7 +88,7 @@ async function handleRegister () {
             v-model="state.password_confirmation"
             type="password"
           />
-        </UFormGroup>
+        </UFormField>
 
         <UButton
           type="submit"

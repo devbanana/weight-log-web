@@ -11,8 +11,18 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  runtimeConfig: {
+    public: {
+      apiBase: ''
+    }
+  },
+
   routeRules: {
     '/': { prerender: true }
+  },
+
+  devServer: {
+    host: 'weight-log.test'
   },
 
   compatibilityDate: '2025-01-15',
