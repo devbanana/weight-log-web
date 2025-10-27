@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { FetchError } from 'ofetch'
+
 const state = reactive({
   name: '',
   email: '',
@@ -12,25 +14,29 @@ async function handleRegister() {
   try {
     await $api('/auth/register', {
       method: 'POST',
+      body: { ...state }
+    })
+
+    await $api('/auth/login', {
+      method: 'POST',
       body: {
-        name: state.name,
         email: state.email,
-        password: state.password,
-        password_confirmation: state.password_confirmation
+        password: state.password
       }
     })
 
-    // NOTE: Laravel Fortify may redirect on successful registration.
-    // If you are building an SPA, you might need to configure Fortify
-    // to return a JSON response instead of a redirect.
-    // After a successful registration, you may want to navigate the user
-    // to the login page or dashboard.
-    // Example: await navigateTo('/dashboard')
-    alert('Registration successful!')
-  } catch (err) {
-    // TODO: Handle validation errors from Fortify, for example, by using the `errors` prop on UFormGroup.
-    console.error(err)
-    alert('Registration failed.')
+    await navigateTo('/profile')
+  } catch (error) {
+    if (error instanceof FetchError && error.status === 422) {
+      const errors = error.data?.errors || {}
+      for (const key in errors) {
+        errors[key].forEach((message: string) => {
+          alert(message)
+        })
+      }
+    } else {
+      alert('An unexpected error occurred. Please try again.')
+    }
   }
 }
 </script>
