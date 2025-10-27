@@ -18,9 +18,7 @@ export default defineNuxtPlugin(async () => {
       const xsrfToken = useCookie('XSRF-TOKEN')
 
       if (xsrfToken.value) {
-        const headers = new Headers(options.headers)
-        headers.set('X-XSRF-TOKEN', xsrfToken.value)
-        options.headers = headers
+        options.headers.set('X-XSRF-TOKEN', xsrfToken.value)
       }
     }
   })
