@@ -7,8 +7,6 @@ export default defineNuxtPlugin(async () => {
     credentials: 'include'
   })
 
-  console.log('CSRF cookie fetched:', useCookie('XSRF-TOKEN').value)
-
   const api = $fetch.create({
     baseURL,
     credentials: 'include',
