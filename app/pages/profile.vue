@@ -1,6 +1,12 @@
 <script setup lang="ts">
-const { $api } = useNuxtApp()
-const { data: user, pending, error } = await useAsyncData('user', () => $api('/auth/user'))
+import { useAPI } from '~/composables/useAPI'
+
+interface User {
+  name: string
+  email: string
+}
+
+const { data: user, pending, error } = await useAPI<User>('/api/user')
 </script>
 
 <template>
