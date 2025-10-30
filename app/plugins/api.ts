@@ -11,14 +11,21 @@ export default defineNuxtPlugin(async () => {
     baseURL,
     credentials: 'include',
     headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Accept': 'application/json'
+      Accept: 'application/json'
     },
     onRequest({ options }) {
       const xsrfToken = useCookie('XSRF-TOKEN')
 
       if (xsrfToken.value) {
         options.headers.set('X-XSRF-TOKEN', xsrfToken.value)
+      }
+
+      if (import.meta.server) {
+        options.headers.set('Origin', useRequestURL().origin)
+        const cookies = useRequestHeaders(['cookie'])
+        if (cookies.cookie) {
+          options.headers.set('Cookie', cookies.cookie)
+        }
       }
     }
   })
