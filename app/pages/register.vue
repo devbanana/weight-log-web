@@ -17,14 +17,6 @@ async function handleRegister() {
       body: { ...state }
     })
 
-    await $api('/auth/login', {
-      method: 'POST',
-      body: {
-        email: state.email,
-        password: state.password
-      }
-    })
-
     await navigateTo('/profile')
   } catch (error) {
     if (error instanceof FetchError && error.status === 422) {
