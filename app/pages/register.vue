@@ -8,7 +8,7 @@ const state = reactive({
   password_confirmation: ''
 })
 
-async function handleRegister() {
+async function handleRegister(): Promise<void> {
   const { $api } = useNuxtApp()
 
   try {
