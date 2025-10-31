@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { FetchError } from 'ofetch'
-
 const state = reactive({
   name: '',
   email: '',
@@ -8,19 +6,19 @@ const state = reactive({
   password_confirmation: ''
 })
 
+const { error, pending, execute } = await useAPI('/auth/register', {
+  method: 'POST',
+  body: () => ({ ...state }),
+  server: false,
+  immediate: false
+})
+
 async function handleRegister(): Promise<void> {
-  const { $api } = useNuxtApp()
+  await execute()
 
-  try {
-    await $api('/auth/register', {
-      method: 'POST',
-      body: { ...state }
-    })
-
-    await navigateTo('/profile')
-  } catch (error) {
-    if (error instanceof FetchError && error.status === 422) {
-      const errors = error.data?.errors || {}
+  if (error.value) {
+    if (error.value.status === 422) {
+      const errors = error.value.data?.errors || {}
       for (const key in errors) {
         errors[key].forEach((message: string) => {
           alert(message)
@@ -29,7 +27,10 @@ async function handleRegister(): Promise<void> {
     } else {
       alert('An unexpected error occurred. Please try again.')
     }
+    return
   }
+
+  await navigateTo('/profile')
 }
 </script>
 
@@ -90,6 +91,7 @@ async function handleRegister(): Promise<void> {
 
         <UButton
           type="submit"
+          :disabled="pending"
           label="Register"
           block
         />
