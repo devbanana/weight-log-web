@@ -22,10 +22,7 @@ async function handleLogin(): Promise<void> {
     return
   }
 
-  alert(JSON.stringify(data.value))
-  alert(JSON.stringify(error.value))
-
-  // await navigateTo('/profile')
+  await navigateTo('/profile')
 }
 </script>
 
