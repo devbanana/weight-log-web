@@ -1,11 +1,18 @@
-import type { UseFetchOptions } from 'nuxt/app'
+import type { ApiError } from '~/types/api'
+import type { AsyncData, UseFetchOptions } from '#app'
+import type { FetchError } from 'ofetch'
+import type { KeysOf, PickFrom } from '#app/composables/asyncData'
+import type { AvailableRouterMethod, NitroFetchRequest } from 'nitropack/types'
 
-export const useAPI = <T>(
-  url: string | (() => string),
-  options?: UseFetchOptions<T>
-) => {
-  return useFetch(url, {
+type DefaultResT<ResT> = ResT extends void ? unknown : ResT
+type ValidMethods<ReqT extends NitroFetchRequest> = AvailableRouterMethod<ReqT> | Uppercase<AvailableRouterMethod<ReqT>>
+
+export const useAPI = <ResT = void, ErrorT = ApiError, ReqT extends NitroFetchRequest = NitroFetchRequest>(
+  url: ReqT | Ref<ReqT> | (() => ReqT),
+  options?: UseFetchOptions<DefaultResT<ResT>, DefaultResT<ResT>, KeysOf<DefaultResT<ResT>>, undefined, ReqT, ValidMethods<ReqT>>
+): AsyncData<PickFrom<DefaultResT<ResT>, KeysOf<DefaultResT<ResT>>> | undefined, FetchError<ErrorT> | undefined> => {
+  return useFetch<ResT, FetchError<ErrorT>, ReqT, ValidMethods<ReqT>, DefaultResT<ResT>>(url, {
     ...options,
-    $fetch: useNuxtApp().$api as typeof $fetch
+    $fetch: useNuxtApp().$api
   })
 }

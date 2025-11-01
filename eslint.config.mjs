@@ -18,7 +18,8 @@ export default withNuxt(
       }
     },
     rules: {
-      '@typescript-eslint/explicit-function-return-type': ['error']
+      '@typescript-eslint/explicit-function-return-type': ['error'],
+      '@typescript-eslint/no-invalid-void-type': ['off']
     }
   }
 )
