@@ -16,11 +16,10 @@ async function handleRegister(): Promise<void> {
   await execute()
 
   if (error.value) {
-    if (error.value.status === 422) {
+    if (error.value.status === 422 && error.value.data?.errors != undefined) {
       alert(JSON.stringify(error.value))
-      const errors = error.value.data?.errors ?? {}
-      for (const key in errors) {
-        errors[key].forEach((message: string) => {
+      for (const [, messages] of Object.entries(error.value.data.errors)) {
+        messages.forEach((message: string) => {
           alert(message)
         })
       }
