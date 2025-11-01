@@ -9,7 +9,6 @@ const state = reactive({
 const { error, pending, execute } = await useAPI('/auth/register', {
   method: 'POST',
   body: () => ({ ...state }),
-  server: false,
   immediate: false
 })
 
@@ -18,7 +17,8 @@ async function handleRegister(): Promise<void> {
 
   if (error.value) {
     if (error.value.status === 422) {
-      const errors = error.value.data?.errors || {}
+      alert(JSON.stringify(error.value))
+      const errors = error.value.data?.errors ?? {}
       for (const key in errors) {
         errors[key].forEach((message: string) => {
           alert(message)

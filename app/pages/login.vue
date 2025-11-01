@@ -1,28 +1,31 @@
 <script setup lang="ts">
-import { FetchError } from 'ofetch'
-
 const state = reactive({
   email: '',
   password: ''
 })
 
-async function handleLogin() {
-  const { $api } = useNuxtApp()
+const { data, error, pending, execute } = await useAPI('/auth/login', {
+  method: 'POST',
+  body: computed(() => ({ ...state })),
+  immediate: false
+})
 
-  try {
-    await $api('/auth/login', {
-      method: 'POST',
-      body: { ...state }
-    })
+async function handleLogin(): Promise<void> {
+  await execute()
 
-    await navigateTo('/profile')
-  } catch (error) {
-    if (error instanceof FetchError && error.status === 422) {
-      alert(error.data?.message || 'Invalid credentials.')
+  if (error.value) {
+    if (error.value.statusCode === 422) {
+      alert(error.value.data?.message ?? 'Invalid credentials.')
     } else {
       alert('An unexpected error occurred. Please try again.')
     }
+    return
   }
+
+  alert(JSON.stringify(data.value))
+  alert(JSON.stringify(error.value))
+
+  // await navigateTo('/profile')
 }
 </script>
 
@@ -64,6 +67,7 @@ async function handleLogin() {
 
         <UButton
           type="submit"
+          :disabled="pending"
           label="Login"
           block
         />
