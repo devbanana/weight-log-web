@@ -4,13 +4,13 @@ const state = reactive({
   password: ''
 })
 
-const { data, error, pending, execute } = await useAPI('/auth/login', {
+const { error, pending, execute } = await useAPI('/auth/login', {
   method: 'POST',
   body: computed(() => ({ ...state })),
   immediate: false
 })
 
-async function handleLogin(): Promise<void> {
+const onLogin = async (): Promise<void> => {
   await execute()
 
   if (error.value) {
@@ -38,7 +38,7 @@ async function handleLogin(): Promise<void> {
       <UForm
         :state="state"
         class="space-y-4"
-        @submit="handleLogin"
+        @submit.prevent="onLogin"
       >
         <UFormField
           label="Email"

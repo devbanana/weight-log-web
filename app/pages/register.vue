@@ -12,7 +12,7 @@ const { error, pending, execute } = await useAPI('/auth/register', {
   immediate: false
 })
 
-async function handleRegister(): Promise<void> {
+const onRegister = async (): Promise<void> => {
   await execute()
 
   if (error.value) {
@@ -45,7 +45,7 @@ async function handleRegister(): Promise<void> {
       <UForm
         :state="state"
         class="space-y-4"
-        @submit="handleRegister"
+        @submit.prevent="onRegister"
       >
         <UFormField
           label="Name"
