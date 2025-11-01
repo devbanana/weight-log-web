@@ -10,6 +10,7 @@ export default defineNuxtPlugin(async () => {
   const api = $fetch.create({
     baseURL,
     credentials: 'include',
+    redirect: 'manual',
     headers: {
       Accept: 'application/json'
     },
