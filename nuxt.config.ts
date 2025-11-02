@@ -33,6 +33,10 @@ export default defineNuxtConfig({
 
   eslint: {
     config: {
+      typescript: {
+        strict: true,
+        tsconfigPath: './tsconfig.json'
+      },
       stylistic: {
         commaDangle: 'never',
         braceStyle: '1tbs'

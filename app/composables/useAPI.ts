@@ -1,8 +1,8 @@
+import type { FetchError } from 'ofetch'
+import type { AvailableRouterMethod, NitroFetchRequest } from 'nitropack/types'
 import type { ApiError } from '~/types/api'
 import type { AsyncData, UseFetchOptions } from '#app'
-import type { FetchError } from 'ofetch'
 import type { KeysOf, PickFrom } from '#app/composables/asyncData'
-import type { AvailableRouterMethod, NitroFetchRequest } from 'nitropack/types'
 
 type DefaultResT<ResT> = ResT extends void ? unknown : ResT
 type ValidMethods<ReqT extends NitroFetchRequest> = AvailableRouterMethod<ReqT> | Uppercase<AvailableRouterMethod<ReqT>>
