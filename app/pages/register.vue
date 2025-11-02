@@ -8,7 +8,7 @@ const state = reactive({
 
 const { error, pending, execute } = await useAPI('/auth/register', {
   method: 'POST',
-  body: () => ({ ...state }),
+  body: computed(() => ({ ...state })),
   immediate: false
 })
 
@@ -16,15 +16,27 @@ const onRegister = async (): Promise<void> => {
   await execute()
 
   if (error.value) {
-    if (error.value.status === 422 && error.value.data?.errors != undefined) {
-      alert(JSON.stringify(error.value))
+    if (error.value.statusCode === 422 && error.value.data?.errors !== undefined) {
+      const errors: string[] = []
       for (const [, messages] of Object.entries(error.value.data.errors)) {
         messages.forEach((message: string) => {
-          alert(message)
+          errors.push(message)
         })
       }
+
+      useToast().add({
+        title: 'Registration Failed',
+        description: errors.join('\n'),
+        color: 'error',
+        icon: 'i-lucide-error'
+      })
     } else {
-      alert('An unexpected error occurred. Please try again.')
+      useToast().add({
+        title: 'Registration Failed',
+        description: error.value.message,
+        color: 'error',
+        icon: 'i-lucide-error'
+      })
     }
     return
   }

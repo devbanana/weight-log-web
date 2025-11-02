@@ -28,12 +28,8 @@ const { data: user, pending, error } = await useAPI<User>('/api/user')
       </template>
 
       <div class="space-y-4">
-        <p>
-          <strong>Name:</strong> {{ user.name }}
-        </p>
-        <p>
-          <strong>Email:</strong> {{ user.email }}
-        </p>
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
       </div>
     </UCard>
   </UContainer>

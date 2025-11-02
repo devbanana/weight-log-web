@@ -14,10 +14,21 @@ const onLogin = async (): Promise<void> => {
   await execute()
 
   if (error.value) {
+    const toast = useToast()
     if (error.value.statusCode === 422) {
-      alert(error.value.data?.message ?? 'Invalid credentials.')
+      toast.add({
+        title: 'Login Error',
+        description: error.value.data?.message ?? 'Invalid credentials.',
+        color: 'error',
+        icon: 'i-lucide-error'
+      })
     } else {
-      alert('An unexpected error occurred. Please try again.')
+      toast.add({
+        title: 'Unknown Error',
+        description: 'An unexpected error occurred. Please try again.',
+        color: 'error',
+        icon: 'i-lucide-error'
+      })
     }
     return
   }

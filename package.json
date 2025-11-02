@@ -9,6 +9,8 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
@@ -19,7 +21,14 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.9.0",
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.0",
+    "eslint-plugin-antfu": "^3.1.1",
+    "eslint-plugin-command": "^3.3.1",
+    "eslint-plugin-jsdoc": "^61.1.11",
+    "eslint-plugin-perfectionist": "^4.15.1",
+    "eslint-plugin-regexp": "^2.10.0",
+    "eslint-plugin-unicorn": "^62.0.0",
+    "eslint-plugin-unused-imports": "^4.3.0",
     "eslint-plugin-vuejs-accessibility": "^2.4.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
