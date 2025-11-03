@@ -4,7 +4,7 @@ import type { AvailableRouterMethod, NitroFetchRequest } from 'nitropack/types'
 import type { FetchError } from 'ofetch'
 import type { Ref } from 'vue'
 
-import type { ApiError } from '~/types/api'
+import type { ApiError } from '~/types/api-error'
 
 import { useFetch, useNuxtApp } from '#app'
 
