@@ -1,3 +1,5 @@
+import { defineNuxtPlugin, useCookie, useRequestHeaders, useRequestURL, useRuntimeConfig } from '#app'
+
 export default defineNuxtPlugin(async () => {
   const config = useRuntimeConfig()
   const baseURL = config.public.apiBase

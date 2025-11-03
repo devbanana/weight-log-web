@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { navigateTo } from '#app'
+import { useToast } from '#ui/composables/useToast'
+import { computed, reactive } from 'vue'
+
+import { useAPI } from '~/composables/useAPI'
+
 const state = reactive({
   name: '',
   email: '',

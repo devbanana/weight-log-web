@@ -44,11 +44,13 @@ export default withNuxt(
     }
   },
   {
+    /// keep-sorted
     plugins: {
       'antfu': pluginAntfu,
       'perfectionist': pluginPerfectionist,
       'unused-imports': unusedImports
     },
+    /// keep-sorted
     rules: {
       'antfu/consistent-chaining': ['error'],
       'antfu/consistent-list-newline': ['error'],
@@ -82,6 +84,9 @@ export default withNuxt(
         { message: 'Use `globalThis` instead.', name: 'global' },
         { message: 'Use `globalThis` instead.', name: 'self' }
       ],
+      'no-restricted-imports': ['error', {
+        paths: ['#imports']
+      }],
       'no-restricted-properties': [
         'error',
         {

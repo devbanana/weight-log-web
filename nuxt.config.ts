@@ -2,6 +2,14 @@
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui'],
 
+  components: {
+    dirs: []
+  },
+
+  imports: {
+    autoImport: false
+  },
+
   devtools: {
     enabled: true
   },

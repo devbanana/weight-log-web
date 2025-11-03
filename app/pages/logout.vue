@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { navigateTo } from '#app'
+
+import { useAPI } from '~/composables/useAPI'
+
 await useAPI('/auth/logout', { method: 'POST' })
 
 await navigateTo('/')

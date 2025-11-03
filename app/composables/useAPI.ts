@@ -2,8 +2,11 @@ import type { AsyncData, UseFetchOptions } from '#app'
 import type { KeysOf, PickFrom } from '#app/composables/asyncData'
 import type { AvailableRouterMethod, NitroFetchRequest } from 'nitropack/types'
 import type { FetchError } from 'ofetch'
+import type { Ref } from 'vue'
 
 import type { ApiError } from '~/types/api'
+
+import { useFetch, useNuxtApp } from '#app'
 
 type DefaultResT<ResT> = ResT extends void ? unknown : ResT
 type ValidMethods<ReqT extends NitroFetchRequest>
