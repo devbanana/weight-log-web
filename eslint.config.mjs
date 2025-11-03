@@ -159,8 +159,7 @@ export default withNuxt(
         'error',
         {
           groups: [
-            'type',
-            ['parent-type', 'sibling-type', 'index-type', 'internal-type'],
+            ['type', 'parent-type', 'sibling-type', 'index-type', 'internal-type'],
             'builtin',
             'external',
             'internal',
