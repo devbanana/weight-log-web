@@ -55,13 +55,17 @@ export default defineNuxtPlugin(() => {
    * This function makes a request to `/sanctum/csrf-cookie` to initialize
    * CSRF protection and receive the `XSRF-TOKEN` cookie from the server.
    * This is a prerequisite for making state-changing requests to the API.
-   * @returns {Promise<void>} A promise that resolves when the cookie has been fetched.
+   * @returns {Promise<CookieRef<string | null | undefined>>} A promise that resolves to the CSRF token cookie reference.
    */
-  const fetchCsrfCookie = (): Promise<void> => {
-    return $fetch('/sanctum/csrf-cookie', {
+  const fetchCsrfCookie = async (): Promise<
+    CookieRef<string | null | undefined>
+  > => {
+    await $fetch('/sanctum/csrf-cookie', {
       baseURL,
       credentials: 'include'
     })
+
+    return getCsrfToken()
   }
 
   /**
@@ -79,8 +83,7 @@ export default defineNuxtPlugin(() => {
     let csrfToken = getCsrfToken()
 
     if (!csrfToken.value) {
-      await fetchCsrfCookie()
-      csrfToken = getCsrfToken()
+      csrfToken = await fetchCsrfCookie()
     }
 
     if (!csrfToken.value) {
