@@ -8,6 +8,8 @@ import {
   useRuntimeConfig
 } from '#app'
 
+import { useAuth } from '~/composables/useAuth'
+
 /**
  * Determines the credentials mode for API requests based on the execution environment.
  *
@@ -108,6 +110,13 @@ export default defineNuxtPlugin(() => {
 
       if (import.meta.server) {
         forwardRequestHeaders(options.headers)
+      }
+    },
+    onResponseError({ response }) {
+      if (response.status === 401) {
+        useAuth().logout()
+      } else if (response.status === 419) {
+        console.warn('CSRF token mismatch or expired.')
       }
     }
   })

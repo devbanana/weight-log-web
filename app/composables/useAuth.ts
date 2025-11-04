@@ -16,6 +16,10 @@ interface AuthInfo {
    * A computed property that is true if the user is logged in.
    */
   isLoggedIn: ComputedRef<boolean>
+  /**
+   * Logs out the current user by setting the user state to null.
+   */
+  logout: () => void
 }
 
 /**
@@ -25,9 +29,13 @@ interface AuthInfo {
 export const useAuth = (): AuthInfo => {
   const user = useState<User | null>('user', () => null)
   const isLoggedIn = computed(() => !!user.value)
+  const logout = (): void => {
+    user.value = null
+  }
 
   return {
     user,
-    isLoggedIn
+    isLoggedIn,
+    logout
   }
 }
