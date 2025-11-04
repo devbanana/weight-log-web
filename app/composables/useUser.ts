@@ -17,25 +17,25 @@ interface AuthInfo {
    */
   isLoggedIn: ComputedRef<boolean>
   /**
-   * Logs out the current user by setting the user state to null.
+   * Clears the authentication state, logging the user out.
    */
-  logout: () => void
+  clearAuth: () => void
 }
 
 /**
  * A composable for managing user authentication state.
  * @returns {AuthInfo} An object containing the authentication state.
  */
-export const useAuth = (): AuthInfo => {
+export const useUser = (): AuthInfo => {
   const user = useState<User | null>('user', () => null)
   const isLoggedIn = computed(() => !!user.value)
-  const logout = (): void => {
+  const clearAuth = (): void => {
     user.value = null
   }
 
   return {
     user,
     isLoggedIn,
-    logout
+    clearAuth
   }
 }
