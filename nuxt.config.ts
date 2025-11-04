@@ -16,6 +16,15 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  appConfig: {
+    ui: {
+      colors: {
+        primary: 'green',
+        neutral: 'slate'
+      }
+    }
+  },
+
   runtimeConfig: {
     public: {
       apiBase: ''
