@@ -45,58 +45,55 @@ const forwardRequestHeaders = (headers: Headers): void => {
   }
 }
 
+/**
+ * Fetches the CSRF cookie from the Laravel Sanctum endpoint.
+ *
+ * This function makes a request to `/sanctum/csrf-cookie` to initialize
+ * CSRF protection and receive the `XSRF-TOKEN` cookie from the server.
+ * This is a prerequisite for making state-changing requests to the API.
+ * @returns {Promise<CookieRef<string | null | undefined>>} A promise that resolves to the CSRF token cookie reference.
+ */
+const fetchCsrfCookie = async (): Promise<
+  CookieRef<string | null | undefined>
+> => {
+  await $fetch('/sanctum/csrf-cookie', {
+    baseURL: useRuntimeConfig().public.apiBase,
+    credentials: 'include'
+  })
+
+  return getCsrfToken()
+}
+
+/**
+ * Ensures the CSRF token is available and sets it on the request headers.
+ *
+ * This function first checks for the presence of the `XSRF-TOKEN` cookie. If the
+ * cookie is not found, it attempts to fetch it by calling `fetchCsrfCookie`.
+ * After ensuring the token is available, it adds the token to the provided
+ * headers object under the `X-XSRF-TOKEN` key.
+ * @param {Headers} headers The Headers object for the outgoing request.
+ * @throws {Error} If the CSRF token cannot be found after attempting to fetch it.
+ * @returns {Promise<void>} A promise that resolves when the header has been set.
+ */
+const setCsrfHeader = async (headers: Headers): Promise<void> => {
+  let csrfToken = getCsrfToken()
+
+  if (!csrfToken.value) {
+    csrfToken = await fetchCsrfCookie()
+  }
+
+  if (!csrfToken.value) {
+    throw new Error(
+      'CSRF token not found in cookies after fetching CSRF cookie.'
+    )
+  }
+
+  headers.set('X-XSRF-TOKEN', csrfToken.value)
+}
+
 export default defineNuxtPlugin(() => {
-  const config = useRuntimeConfig()
-  const baseURL = config.public.apiBase
-
-  /**
-   * Fetches the CSRF cookie from the Laravel Sanctum endpoint.
-   *
-   * This function makes a request to `/sanctum/csrf-cookie` to initialize
-   * CSRF protection and receive the `XSRF-TOKEN` cookie from the server.
-   * This is a prerequisite for making state-changing requests to the API.
-   * @returns {Promise<CookieRef<string | null | undefined>>} A promise that resolves to the CSRF token cookie reference.
-   */
-  const fetchCsrfCookie = async (): Promise<
-    CookieRef<string | null | undefined>
-  > => {
-    await $fetch('/sanctum/csrf-cookie', {
-      baseURL,
-      credentials: 'include'
-    })
-
-    return getCsrfToken()
-  }
-
-  /**
-   * Ensures the CSRF token is available and sets it on the request headers.
-   *
-   * This function first checks for the presence of the `XSRF-TOKEN` cookie. If the
-   * cookie is not found, it attempts to fetch it by calling `fetchCsrfCookie`.
-   * After ensuring the token is available, it adds the token to the provided
-   * headers object under the `X-XSRF-TOKEN` key.
-   * @param {Headers} headers The Headers object for the outgoing request.
-   * @throws {Error} If the CSRF token cannot be found after attempting to fetch it.
-   * @returns {Promise<void>} A promise that resolves when the header has been set.
-   */
-  const setCsrfHeader = async (headers: Headers): Promise<void> => {
-    let csrfToken = getCsrfToken()
-
-    if (!csrfToken.value) {
-      csrfToken = await fetchCsrfCookie()
-    }
-
-    if (!csrfToken.value) {
-      throw new Error(
-        'CSRF token not found in cookies after fetching CSRF cookie.'
-      )
-    }
-
-    headers.set('X-XSRF-TOKEN', csrfToken.value)
-  }
-
   const api = $fetch.create({
-    baseURL,
+    baseURL: useRuntimeConfig().public.apiBase,
     credentials: getCredentialsMode(),
     redirect: 'manual',
     headers: {
