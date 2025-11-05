@@ -15,28 +15,25 @@ type ValidMethods<ReqT extends NitroFetchRequest>
 export const useAPI = <
   ResT = void,
   ErrorT = ApiError,
-  ReqT extends NitroFetchRequest = NitroFetchRequest
+  ReqT extends NitroFetchRequest = NitroFetchRequest,
+  MethodT extends ValidMethods<ReqT> = ValidMethods<ReqT>,
+  _ResT = DefaultResT<ResT>,
+  DataT = _ResT
 >(
   url: ReqT | Ref<ReqT> | (() => ReqT),
   options?: UseFetchOptions<
-    DefaultResT<ResT>,
-    DefaultResT<ResT>,
-    KeysOf<DefaultResT<ResT>>,
+    _ResT,
+    DataT,
+    KeysOf<DataT>,
     undefined,
     ReqT,
-    ValidMethods<ReqT>
+    MethodT
   >
 ): AsyncData<
-  PickFrom<DefaultResT<ResT>, KeysOf<DefaultResT<ResT>>> | undefined,
+  PickFrom<DataT, KeysOf<DataT>> | undefined,
   FetchError<ErrorT> | undefined
 > => {
-  return useFetch<
-    ResT,
-    FetchError<ErrorT>,
-    ReqT,
-    ValidMethods<ReqT>,
-    DefaultResT<ResT>
-  >(url, {
+  return useFetch<ResT, FetchError<ErrorT>, ReqT, MethodT, _ResT, DataT>(url, {
     ...options,
     $fetch: useNuxtApp().$api
   })
