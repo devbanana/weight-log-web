@@ -8,7 +8,7 @@ import {
   useRuntimeConfig
 } from '#app'
 
-import { useUser } from '~/composables/useUser'
+import { useUser } from '@/composables/useUser'
 
 /**
  * Determines the credentials mode for API requests based on the execution environment.
@@ -92,6 +92,8 @@ const setCsrfHeader = async (headers: Headers): Promise<void> => {
 }
 
 export default defineNuxtPlugin(() => {
+  const { clearAuth } = useUser()
+
   const api = $fetch.create({
     baseURL: useRuntimeConfig().public.apiBase,
     credentials: getCredentialsMode(),
@@ -100,6 +102,10 @@ export default defineNuxtPlugin(() => {
       Accept: 'application/json'
     },
     async onRequest({ options }): Promise<void> {
+      if (import.meta.server) {
+        forwardRequestHeaders(options.headers)
+      }
+
       const securedMethods = ['POST', 'PUT', 'PATCH', 'DELETE']
       if (
         options.method
@@ -107,14 +113,10 @@ export default defineNuxtPlugin(() => {
       ) {
         await setCsrfHeader(options.headers)
       }
-
-      if (import.meta.server) {
-        forwardRequestHeaders(options.headers)
-      }
     },
     onResponseError({ response }) {
       if (response.status === 401) {
-        useUser().clearAuth()
+        clearAuth()
       } else if (response.status === 419) {
         console.warn('CSRF token mismatch or expired.')
       }
