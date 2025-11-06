@@ -1,6 +1,9 @@
 <script setup>
 import { useHead, useSeoMeta } from '#app'
 
+import AppLogo from '~/components/AppLogo.vue'
+import TemplateMenu from '~/components/TemplateMenu.vue'
+
 useHead({
   meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
   link: [{ rel: 'icon', href: '/favicon.ico' }],
