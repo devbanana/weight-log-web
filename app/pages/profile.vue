@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { useAPI } from '~/composables/useAPI'
+import { useAuth } from '~/composables/useAuth'
+import { useUser } from '~/composables/useUser'
 
-interface User {
-  name: string
-  email: string
-}
-
-const { data: user, pending, error } = await useAPI<User>('/api/user')
+const { error, pending } = useAuth().load()
+const { user } = useUser()
 </script>
 
 <template>
