@@ -44,14 +44,16 @@ export const useAuth = (): AuthInfo => {
     return toAsyncResponseStatus(response)
   }
 
-  const logout = (): void => {
-    void useAPI('/auth/logout', {
-      method: 'POST',
-      // Convert undefined to null to prevent warning from useFetch
-      transform: () => null
-    })
-
-    clearAuth()
+  const logout = async (): Promise<void> => {
+    try {
+      await useAPI('/auth/logout', {
+        method: 'POST',
+        // Convert undefined to null to prevent warning from useFetch
+        transform: () => null
+      })
+    } finally {
+      clearAuth()
+    }
   }
 
   return {
