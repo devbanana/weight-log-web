@@ -84,9 +84,12 @@ export default withNuxt(
         { message: 'Use `globalThis` instead.', name: 'global' },
         { message: 'Use `globalThis` instead.', name: 'self' }
       ],
-      'no-restricted-imports': ['error', {
-        paths: ['#imports']
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: ['#imports']
+        }
+      ],
       'no-restricted-properties': [
         'error',
         {
@@ -159,7 +162,13 @@ export default withNuxt(
         'error',
         {
           groups: [
-            ['type', 'parent-type', 'sibling-type', 'index-type', 'internal-type'],
+            [
+              'type',
+              'parent-type',
+              'sibling-type',
+              'index-type',
+              'internal-type'
+            ],
             'builtin',
             'external',
             'internal',

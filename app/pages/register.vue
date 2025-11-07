@@ -22,7 +22,10 @@ const onRegister = async (): Promise<void> => {
   await execute()
 
   if (error.value) {
-    if (error.value.statusCode === 422 && error.value.data?.errors !== undefined) {
+    if (
+      error.value.statusCode === 422
+      && error.value.data?.errors !== undefined
+    ) {
       const errors: string[] = []
       for (const [, messages] of Object.entries(error.value.data.errors)) {
         messages.forEach((message: string) => {

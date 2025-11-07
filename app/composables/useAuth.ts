@@ -11,7 +11,9 @@ interface AuthInfo {
   logout: () => Promise<void>
 }
 
-const toAsyncResponseStatus = <DataT = unknown, ErrorT = unknown>(data: AsyncData<DataT, ErrorT>): AsyncResponseStatus<DataT, ErrorT> => {
+const toAsyncResponseStatus = <DataT = unknown, ErrorT = unknown>(
+  data: AsyncData<DataT, ErrorT>
+): AsyncResponseStatus<DataT, ErrorT> => {
   const asyncResponse = {
     error: data.error,
     pending: data.pending,
@@ -28,7 +30,10 @@ const toAsyncResponseStatus = <DataT = unknown, ErrorT = unknown>(data: AsyncDat
 export const useAuth = (): AuthInfo => {
   const { user, clearAuth } = useUser()
 
-  const load = (): AsyncResponseStatus<User | undefined, ApiError | undefined> => {
+  const load = (): AsyncResponseStatus<
+    User | undefined,
+    ApiError | undefined
+  > => {
     const response = useAPI<User>('/api/user', {
       transform: (data) => {
         user.value = data
