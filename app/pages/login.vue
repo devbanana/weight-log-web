@@ -5,6 +5,7 @@ import { useToast } from '#ui/composables/useToast'
 import { computed, reactive } from 'vue'
 
 import { useAPI } from '~/composables/useAPI'
+import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({
   middleware: 'guest'
@@ -43,6 +44,9 @@ const onLogin = async (): Promise<void> => {
     }
     return
   }
+
+  // Load user data after successful login
+  await useAuth().load()
 
   await navigateTo('/profile')
 }
