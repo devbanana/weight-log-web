@@ -124,10 +124,6 @@ export default withNuxt(
           allowTernary: true
         }
       ],
-      'no-unused-vars': [
-        'error',
-        { vars: 'all', args: 'after-used', ignoreRestSiblings: true }
-      ],
       'no-use-before-define': [
         'error',
         { classes: false, functions: false, variables: true }
