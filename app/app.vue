@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { navigateTo, useHead, useSeoMeta } from '#app'
+import { useHead, useSeoMeta } from '#app'
 
 import AppLogo from '~/components/AppLogo.vue'
 import { useAuth } from '~/composables/useAuth'
@@ -7,11 +7,6 @@ import { useUser } from '~/composables/useUser'
 
 const { isLoggedIn, user } = useUser()
 const { logout } = useAuth()
-
-const handleLogout = async (): Promise<void> => {
-  await logout()
-  await navigateTo('/')
-}
 
 useHead({
   meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
@@ -54,7 +49,7 @@ useSeoMeta({
           <UButton
             color="neutral"
             variant="ghost"
-            @click="handleLogout"
+            @click="logout"
           >
             Logout
           </UButton>

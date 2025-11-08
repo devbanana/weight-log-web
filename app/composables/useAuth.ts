@@ -3,6 +3,8 @@ import type { ApiError } from '~/types/api-error'
 import type { AsyncResponseStatus } from '~/types/async-response-status'
 import type { User } from '~/types/user'
 
+import { navigateTo } from '#app'
+
 import { useAPI } from '@/composables/useAPI'
 import { useUser } from '@/composables/useUser'
 
@@ -53,6 +55,7 @@ export const useAuth = (): AuthInfo => {
       })
     } finally {
       clearAuth()
+      await navigateTo('/')
     }
   }
 
