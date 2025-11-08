@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { navigateTo, useHead, useSeoMeta } from '#app'
 
 import AppLogo from '~/components/AppLogo.vue'
@@ -8,7 +8,7 @@ import { useUser } from '~/composables/useUser'
 const { isLoggedIn, user } = useUser()
 const { logout } = useAuth()
 
-const handleLogout = async () => {
+const handleLogout = async (): Promise<void> => {
   await logout()
   await navigateTo('/')
 }
