@@ -43,6 +43,17 @@ import { useAuth } from '~/composables/useAuth'
 const { user } = useUser() // Error: useUser is not defined
 ```
 
+**Exception:** Compiler macros like `definePageMeta` may be imported from `#imports` since they're build-time transformations rather than runtime functions:
+
+```typescript
+// ✅ Allowed for compiler macros
+import { definePageMeta } from '#imports'
+
+definePageMeta({
+  middleware: 'auth'
+})
+```
+
 This design choice prioritizes explicitness and makes dependencies clear.
 
 ### Laravel Sanctum Cookie-Based Authentication
@@ -169,7 +180,7 @@ Backend must have CORS configured to allow credentials and same-site cookies.
 
 - Perfectionist plugin enforces sorted imports (types, external, internal)
 - No `console.log` (only `warn`/`error` allowed)
-- No imports from `#imports` (use explicit imports)
+- Imports from `#imports` allowed only for compiler macros (e.g., `definePageMeta`)
 
 **Prettier:**
 
@@ -190,6 +201,9 @@ app/
 │   ├── useAPI.ts       # API wrapper around useFetch
 │   ├── useAuth.ts      # Auth logic (login, logout, load)
 │   └── useUser.ts      # Global user state management
+├── middleware/          # Route middleware
+│   ├── auth.ts         # Protects authenticated routes
+│   └── guest.ts        # Protects guest-only routes (login/register)
 ├── pages/               # File-based routing
 ├── plugins/             # Auto-loaded plugins
 │   ├── api.ts          # $fetch instance + CSRF handling
@@ -201,7 +215,7 @@ app/
 
 **Authentication:**
 
-- No route middleware - pages check `isLoggedIn` themselves if needed
+- Route protection via `auth` and `guest` middleware (use `definePageMeta`)
 - User state is global via `useState('user')` - don't create duplicate state
 - Auth plugin loads user on app init - don't call `load()` in pages
 

@@ -1,5 +1,11 @@
 <script setup lang="ts">
+import { definePageMeta } from '#imports'
+
 import { useUser } from '~/composables/useUser'
+
+definePageMeta({
+  middleware: 'auth'
+})
 
 const { user } = useUser()
 </script>

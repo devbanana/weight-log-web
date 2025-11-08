@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { navigateTo } from '#app'
+import { definePageMeta } from '#imports'
 import { useToast } from '#ui/composables/useToast'
 import { computed, reactive } from 'vue'
 
 import { useAPI } from '~/composables/useAPI'
+
+definePageMeta({
+  middleware: 'guest'
+})
 
 const state = reactive({
   email: '',
   password: ''
 })
 
-const { error, pending, execute } = await useAPI('/auth/login', {
+const { error, pending, execute } = useAPI('/auth/login', {
   method: 'POST',
   body: computed(() => ({ ...state })),
   immediate: false
@@ -26,14 +31,14 @@ const onLogin = async (): Promise<void> => {
         title: 'Login Error',
         description: error.value.data?.message ?? 'Invalid credentials.',
         color: 'error',
-        icon: 'i-lucide-error'
+        icon: 'i-lucide-circle-x'
       })
     } else {
       toast.add({
         title: 'Unknown Error',
         description: 'An unexpected error occurred. Please try again.',
         color: 'error',
-        icon: 'i-lucide-error'
+        icon: 'i-lucide-circle-x'
       })
     }
     return

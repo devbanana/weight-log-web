@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { navigateTo } from '#app'
+import { definePageMeta } from '#imports'
 
 import { useAuth } from '@/composables/useAuth'
+
+definePageMeta({
+  middleware: 'auth'
+})
 
 await useAuth().logout()
 

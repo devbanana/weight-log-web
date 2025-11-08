@@ -84,12 +84,6 @@ export default withNuxt(
         { message: 'Use `globalThis` instead.', name: 'global' },
         { message: 'Use `globalThis` instead.', name: 'self' }
       ],
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: ['#imports']
-        }
-      ],
       'no-restricted-properties': [
         'error',
         {

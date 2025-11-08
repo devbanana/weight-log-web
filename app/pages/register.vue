@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { navigateTo } from '#app'
+import { definePageMeta } from '#imports'
 import { useToast } from '#ui/composables/useToast'
 import { computed, reactive } from 'vue'
 
 import { useAPI } from '~/composables/useAPI'
+
+definePageMeta({
+  middleware: 'guest'
+})
 
 const state = reactive({
   name: '',
