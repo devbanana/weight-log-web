@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Nuxt 4 web application for weight logging, built with TypeScript, Vue 3, and Nuxt UI. The frontend integrates with a Laravel backend using Sanctum cookie-based authentication.
 
 **Key Technologies:**
+
 - Nuxt 4.1.3 with TypeScript (strict mode)
 - @nuxt/ui 4.0.1 (Tailwind-based component library)
 - Laravel Sanctum integration (cookie-based session auth)
@@ -56,6 +57,7 @@ The authentication system uses **cookie-based sessions**, not bearer tokens. Und
 #### Authentication Flow:
 
 **CSRF Protection:**
+
 - Before any POST/PUT/PATCH/DELETE request, the API plugin automatically:
   1. Checks for `XSRF-TOKEN` cookie
   2. If missing, fetches from `/sanctum/csrf-cookie`
@@ -63,11 +65,13 @@ The authentication system uses **cookie-based sessions**, not bearer tokens. Und
 - **Never manually add CSRF headers** - the plugin handles this
 
 **Server-Side Rendering:**
+
 - On server: `forwardRequestHeaders()` copies `Origin` and `Cookie` from original request
 - **Critical:** Must call `forwardRequestHeaders()` BEFORE CSRF setup to avoid composable errors
 - On client: Uses `credentials: 'include'` to send cookies
 
 **Global User State:**
+
 ```typescript
 // Global state via Nuxt's useState (not Pinia/Vuex)
 const user = useState<User | null>('user', () => null)
@@ -75,6 +79,7 @@ const isLoggedIn = computed(() => !!user.value)
 ```
 
 **Logout Resilience:**
+
 ```typescript
 // Always clears auth in finally block, even if API call fails
 try {
@@ -85,6 +90,7 @@ try {
 ```
 
 **Error Handling:**
+
 - 401 → Auto-clears auth state (in `api.ts` plugin)
 - 419 → CSRF mismatch warning
 - 422 → Validation errors (show via toast)
@@ -94,11 +100,13 @@ try {
 Three-layer system for API calls:
 
 1. **`$fetch` instance** (`app/plugins/api.ts`):
+
    - Custom fetch with CSRF, auth, error handling
    - Base URL from `NUXT_PUBLIC_API_BASE` env var
    - Provided globally as `$api`
 
 2. **`useAPI` composable** (`app/composables/useAPI.ts`):
+
    - Wrapper around `useFetch` using custom `$api`
    - Returns reactive state (pending, error, data)
    - Fully typed with TypeScript generics
@@ -152,16 +160,19 @@ Backend must have CORS configured to allow credentials and same-site cookies.
 ## Code Style & Conventions
 
 **TypeScript:**
+
 - Strict mode enabled
 - Explicit return types required (`@typescript-eslint/explicit-function-return-type`)
 - `noImplicitAny`, `strictNullChecks` enabled
 
 **ESLint:**
+
 - Perfectionist plugin enforces sorted imports (types, external, internal)
 - No `console.log` (only `warn`/`error` allowed)
 - No imports from `#imports` (use explicit imports)
 
 **Prettier:**
+
 - No semicolons
 - Single quotes
 - No trailing commas
@@ -189,20 +200,24 @@ app/
 ## Common Patterns & Gotchas
 
 **Authentication:**
+
 - No route middleware - pages check `isLoggedIn` themselves if needed
 - User state is global via `useState('user')` - don't create duplicate state
 - Auth plugin loads user on app init - don't call `load()` in pages
 
 **API Calls:**
+
 - CSRF is auto-handled - never manually add `X-XSRF-TOKEN` header
 - Use `computed(() => state)` for reactive request bodies
 - `useAPI` supports all `useFetch` options (immediate, transform, etc.)
 
 **Components:**
+
 - Must manually import components (no auto-registration)
 - Nuxt UI components like `UButton`, `UForm` available via framework
 
 **Environment:**
+
 - `NUXT_PUBLIC_API_BASE` - Backend API URL (e.g., `http://localhost`)
 - Dev server runs on `weight-log.test` (likely Herd/Valet setup)
 
