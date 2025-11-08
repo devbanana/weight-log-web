@@ -72,13 +72,18 @@ const fetchCsrfCookie = async (): Promise<
  * After ensuring the token is available, it adds the token to the provided
  * headers object under the `X-XSRF-TOKEN` key.
  * @param {Headers} headers The Headers object for the outgoing request.
+ * @param {boolean} forceRefresh If true, always fetches a fresh CSRF cookie.
  * @throws {Error} If the CSRF token cannot be found after attempting to fetch it.
  * @returns {Promise<void>} A promise that resolves when the header has been set.
  */
-const setCsrfHeader = async (headers: Headers): Promise<void> => {
+const setCsrfHeader = async (
+  headers: Headers,
+  forceRefresh = false
+): Promise<void> => {
   let csrfToken = getCsrfToken()
 
-  if (!csrfToken.value) {
+  // Fetch fresh token if forced or if token doesn't exist
+  if (forceRefresh || !csrfToken.value) {
     csrfToken = await fetchCsrfCookie()
   }
 
@@ -118,7 +123,12 @@ export default defineNuxtPlugin(() => {
       if (response.status === 401) {
         clearAuth()
       } else if (response.status === 419) {
-        console.warn('CSRF token mismatch or expired.')
+        // Clear the stale CSRF cookie so next request fetches a fresh one
+        const csrfToken = getCsrfToken()
+        csrfToken.value = null
+        console.warn(
+          'CSRF token mismatch or expired. Token cleared, please retry.'
+        )
       }
     }
   })
