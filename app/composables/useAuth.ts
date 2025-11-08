@@ -3,14 +3,20 @@ import type { ApiError } from '~/types/api-error'
 import type { AsyncResponseStatus } from '~/types/async-response-status'
 import type { User } from '~/types/user'
 
-import { navigateTo } from '#app'
+import { navigateTo, useRoute } from '#app'
 
 import { useAPI } from '@/composables/useAPI'
 import { useUser } from '@/composables/useUser'
 
 interface AuthInfo {
   load: () => AsyncResponseStatus<User | undefined, ApiError | undefined>
+  login: (credentials: LoginCredentials) => Promise<void>
   logout: () => Promise<void>
+}
+
+interface LoginCredentials {
+  email: string
+  password: string
 }
 
 const toAsyncResponseStatus = <DataT = unknown, ErrorT = unknown>(
@@ -46,6 +52,33 @@ export const useAuth = (): AuthInfo => {
     return toAsyncResponseStatus(response)
   }
 
+  const login = async (credentials: LoginCredentials): Promise<void> => {
+    const { isLoggedIn } = useUser()
+    const currentRoute = useRoute()
+
+    let redirectPath = '/'
+    if (currentRoute.query.redirect) {
+      redirectPath = currentRoute.query.redirect as string
+    }
+
+    if (isLoggedIn.value) {
+      await navigateTo(redirectPath)
+      return
+    }
+
+    const { error } = await useAPI('/auth/login', {
+      method: 'POST',
+      body: credentials
+    })
+
+    if (error.value) {
+      throw error.value
+    }
+
+    await load().execute()
+    await navigateTo(redirectPath)
+  }
+
   const logout = async (): Promise<void> => {
     try {
       await useAPI('/auth/logout', {
@@ -61,6 +94,7 @@ export const useAuth = (): AuthInfo => {
 
   return {
     load,
+    login,
     logout
   }
 }

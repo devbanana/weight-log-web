@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { navigateTo } from '#app'
 import { definePageMeta } from '#imports'
 import { useToast } from '#ui/composables/useToast'
-import { computed, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
-import { useAPI } from '~/composables/useAPI'
 import { useAuth } from '~/composables/useAuth'
+import { isApiError } from '~/utils/api-error'
 
 definePageMeta({
   middleware: 'guest'
@@ -16,25 +15,25 @@ const state = reactive({
   password: ''
 })
 
-const { error, pending, execute } = useAPI('/auth/login', {
-  method: 'POST',
-  body: computed(() => ({ ...state })),
-  immediate: false
-})
+const pending = ref(false)
+const { login } = useAuth()
 
 const onLogin = async (): Promise<void> => {
-  await execute()
+  pending.value = true
 
-  if (error.value) {
+  try {
+    await login(state)
+  } catch (error) {
     const toast = useToast()
-    if (error.value.statusCode === 422) {
+    if (isApiError(error) && error.statusCode === 422) {
       toast.add({
         title: 'Login Error',
-        description: error.value.data?.message ?? 'Invalid credentials.',
+        description: error.data?.message ?? 'Invalid credentials.',
         color: 'error',
         icon: 'i-lucide-circle-x'
       })
     } else {
+      console.error(error)
       toast.add({
         title: 'Unknown Error',
         description: 'An unexpected error occurred. Please try again.',
@@ -42,13 +41,9 @@ const onLogin = async (): Promise<void> => {
         icon: 'i-lucide-circle-x'
       })
     }
-    return
+  } finally {
+    pending.value = false
   }
-
-  // Load user data after successful login
-  await useAuth().load()
-
-  await navigateTo('/profile')
 }
 </script>
 
