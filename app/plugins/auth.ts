@@ -1,9 +1,17 @@
+import type { User } from '~/types/user'
+
 import { defineNuxtPlugin } from '#app'
 
-import { useAuth } from '@/composables/useAuth'
+import { useAPI } from '@/composables/useAPI'
+import { useUser } from '@/composables/useUser'
 
 export default defineNuxtPlugin(async () => {
-  const { load } = useAuth()
+  const { user } = useUser()
 
-  await load()
+  await useAPI<User>('/api/user', {
+    transform: (data) => {
+      user.value = data
+      return data
+    }
+  })
 })
