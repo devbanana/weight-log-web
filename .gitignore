@@ -18,7 +18,13 @@ logs
 .fleet
 .idea
 
+# Claude Code
+.claude/settings.local.json
+
 # Local env files
 .env
 .env.*
 !.env.example
+
+# Test coverage
+coverage
