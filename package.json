@@ -11,7 +11,10 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.70",
@@ -21,6 +24,9 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.9.0",
+    "@nuxt/test-utils": "^3.20.1",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vue/test-utils": "^2.4.6",
     "eslint": "^9.39.0",
     "eslint-plugin-antfu": "^3.1.1",
     "eslint-plugin-command": "^3.3.1",
@@ -30,8 +36,10 @@
     "eslint-plugin-unicorn": "^62.0.0",
     "eslint-plugin-unused-imports": "^4.3.0",
     "eslint-plugin-vuejs-accessibility": "^2.4.1",
+    "happy-dom": "^20.0.10",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
+    "vitest": "^3.2.4",
     "vue-tsc": "^3.1.2"
   },
   "overrides": {

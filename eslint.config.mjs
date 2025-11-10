@@ -196,6 +196,7 @@ export default withNuxt(
       'unicorn/no-array-for-each': ['off'],
       'unicorn/no-array-reduce': ['off'],
       'unicorn/no-null': ['off'],
+      'unicorn/no-useless-undefines': ['error', { checkArguments: true }],
       'unicorn/prevent-abbreviations': ['off'],
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
