@@ -74,9 +74,7 @@ describe('useAuth', () => {
     })
 
     it('should navigate to home after successful login', async () => {
-      mockApi
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(mockUser)
+      mockApi.mockResolvedValueOnce(undefined).mockResolvedValueOnce(mockUser)
 
       const { login } = useAuth()
 
@@ -93,9 +91,7 @@ describe('useAuth', () => {
         query: { redirect: '/dashboard' }
       } as unknown as ReturnType<typeof useRoute>)
 
-      mockApi
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(mockUser)
+      mockApi.mockResolvedValueOnce(undefined).mockResolvedValueOnce(mockUser)
 
       const { login } = useAuth()
 

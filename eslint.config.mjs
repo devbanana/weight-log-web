@@ -32,7 +32,9 @@ export default withNuxt(
       parserOptions: {
         parser: tseslint.parser,
         sourceType: 'module',
-        projectService: true
+        projectService: {
+          allowDefaultProject: ['vitest.config.ts']
+        }
       }
     },
     rules: {
@@ -196,7 +198,7 @@ export default withNuxt(
       'unicorn/no-array-for-each': ['off'],
       'unicorn/no-array-reduce': ['off'],
       'unicorn/no-null': ['off'],
-      'unicorn/no-useless-undefines': ['error', { checkArguments: true }],
+      'unicorn/no-useless-undefined': ['error', { checkArguments: false }],
       'unicorn/prevent-abbreviations': ['off'],
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
