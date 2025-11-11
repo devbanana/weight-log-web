@@ -16,14 +16,17 @@ This is a Nuxt 4 web application for weight logging, built with TypeScript, Vue 
 ## Development Commands
 
 ```bash
-npm run dev          # Start dev server at weight-log.test:3000
-npm run build        # Production build
-npm run preview      # Preview production build
-npm run lint         # Check linting
-npm run lint:fix     # Auto-fix linting issues
-npm run format       # Check formatting
-npm run format:fix   # Auto-format with Prettier
-npm run typecheck    # Run TypeScript type checking
+npm run dev             # Start dev server at weight-log.test:3000
+npm run build           # Production build
+npm run preview         # Preview production build
+npm run lint            # Check linting
+npm run lint:fix        # Auto-fix linting issues
+npm run format          # Check formatting
+npm run format:fix      # Auto-format with Prettier
+npm run typecheck       # Run TypeScript type checking
+npm test                # Run tests once
+npm run test:watch      # Run tests in watch mode
+npm run test:coverage   # Run tests with coverage report
 ```
 
 **CI/CD:** GitHub Actions runs `lint` + `typecheck` on every push (Node 22, Ubuntu).
@@ -63,7 +66,7 @@ The authentication system uses **cookie-based sessions**, not bearer tokens. Und
 #### Plugin Execution Order (on app init):
 
 1. **`app/plugins/api.ts`**: Creates custom `$fetch` instance with CSRF handling
-2. **`app/plugins/auth.ts`**: Loads current user via `useAuth().load()`
+2. **`app/plugins/auth.ts`**: Fetches current user from `/api/user` and sets global user state
 
 #### Authentication Flow:
 
@@ -126,7 +129,7 @@ Three-layer system for API calls:
    - Business logic layer
    - Use `useAPI` internally
 
-**Always use `useAPI` for API calls**, never direct `$fetch` or `useFetch`:
+**Always use `useAPI` or `$api` for API calls**, never direct `$fetch` or `useFetch`:
 
 ```typescript
 // ✅ Correct
@@ -135,26 +138,6 @@ const response = useAPI<User>('/api/user')
 // ❌ Don't do this
 const response = await $fetch('/api/user')
 ```
-
-### Form Handling Pattern
-
-Forms use reactive state objects (not v-model on individual fields):
-
-```typescript
-const state = reactive({
-  email: '',
-  password: ''
-})
-
-// Use computed for reactive request bodies
-const { error } = useAPI('/auth/login', {
-  method: 'POST',
-  body: computed(() => state), // Reactive body
-  immediate: false
-})
-```
-
-Toast notifications via `useToast()` for user feedback.
 
 ## Expected Backend Endpoints
 
