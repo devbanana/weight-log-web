@@ -2,7 +2,7 @@ import type { User } from '~/types/user'
 
 import { navigateTo, useNuxtApp, useRoute } from '#app'
 
-import { useUser } from '@/composables/useUser'
+import { useUser } from '~/composables/useUser'
 
 interface AuthInfo {
   login: (credentials: LoginCredentials) => Promise<void>

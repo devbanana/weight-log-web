@@ -8,7 +8,7 @@ import {
   useRuntimeConfig
 } from '#app'
 
-import { useUser } from '@/composables/useUser'
+import { useUser } from '~/composables/useUser'
 
 /**
  * Determines the credentials mode for API requests based on the execution environment.
