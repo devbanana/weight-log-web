@@ -4,7 +4,7 @@ import { useFetch, useNuxtApp } from '#app'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 
-import { useAPI } from './useAPI'
+import { useAPI } from '~/composables/useAPI'
 
 // Mock Nuxt composables
 vi.mock('#app', async (importOriginal) => {

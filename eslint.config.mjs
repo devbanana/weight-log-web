@@ -33,7 +33,7 @@ export default withNuxt(
         parser: tseslint.parser,
         sourceType: 'module',
         projectService: {
-          allowDefaultProject: ['vitest.config.ts', 'vitest.setup.ts']
+          allowDefaultProject: ['vitest.config.ts']
         }
       }
     },

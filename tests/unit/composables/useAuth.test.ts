@@ -3,8 +3,8 @@ import type { User } from '~/types/user'
 import { navigateTo, useNuxtApp, useRoute } from '#app'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useAuth } from './useAuth'
-import { useUser } from './useUser'
+import { useAuth } from '~/composables/useAuth'
+import { useUser } from '~/composables/useUser'
 
 // Mock Nuxt composables
 vi.mock('#app', async (importOriginal) => {

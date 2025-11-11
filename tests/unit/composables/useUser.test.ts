@@ -2,7 +2,7 @@ import type { User } from '~/types/user'
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { useUser } from './useUser'
+import { useUser } from '~/composables/useUser'
 
 describe('useUser', () => {
   beforeEach(() => {

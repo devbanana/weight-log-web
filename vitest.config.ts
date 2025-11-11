@@ -2,7 +2,8 @@ import { defineVitestConfig } from '@nuxt/test-utils/config'
 
 export default defineVitestConfig({
   test: {
-    setupFiles: ['./vitest.setup.ts'],
+    setupFiles: ['./tests/vitest.setup.ts'],
+    include: ['tests/**/*.test.ts'],
     environment: 'nuxt',
     environmentOptions: {
       nuxt: {
@@ -17,6 +18,7 @@ export default defineVitestConfig({
         '.nuxt/',
         '.output/',
         'dist/',
+        'tests/',
         '**/*.config.ts',
         '**/*.d.ts'
       ]
