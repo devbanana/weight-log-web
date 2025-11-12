@@ -1,8 +1,10 @@
 import type { Ref } from 'vue'
+import type { User } from '~/types/user'
 
 import { useSeoMeta } from '#app'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ref } from 'vue'
 
 import app from '~/app.vue'
 
@@ -12,22 +14,27 @@ interface MockAuthReturn {
 }
 
 interface MockUserReturn {
-  user: Ref<null>
+  user: Ref<User | null>
   isLoggedIn: Ref<boolean>
   clearAuth: ReturnType<typeof vi.fn>
 }
 
 vi.mock('~/components/AppLogo.vue')
+
+const mockLogout = vi.fn()
+const mockUser = ref<User | null>(null)
+const mockIsLoggedIn = ref(false)
+
 vi.mock('~/composables/useAuth', () => ({
   useAuth: (): MockAuthReturn => ({
     login: vi.fn(),
-    logout: vi.fn()
+    logout: mockLogout
   })
 }))
 vi.mock('~/composables/useUser', () => ({
   useUser: (): MockUserReturn => ({
-    user: { value: null } as Ref<null>,
-    isLoggedIn: { value: false } as Ref<boolean>,
+    user: mockUser,
+    isLoggedIn: mockIsLoggedIn,
     clearAuth: vi.fn()
   })
 }))
@@ -42,6 +49,12 @@ vi.mock('#app', async (importOriginal) => {
 })
 
 describe('App.vue', () => {
+  beforeEach(() => {
+    mockUser.value = null
+    mockIsLoggedIn.value = false
+    mockLogout.mockClear()
+  })
+
   it('sets a template title', async () => {
     await mountSuspended(app)
 
@@ -81,5 +94,43 @@ describe('App.vue', () => {
         ogSiteName: 'Weight Log'
       })
     )
+  })
+
+  it('displays login and register buttons when not logged in', async () => {
+    mockIsLoggedIn.value = false
+    mockUser.value = null
+
+    const wrapper = await mountSuspended(app)
+
+    expect(wrapper.text()).toContain('Login')
+    expect(wrapper.text()).toContain('Register')
+    expect(wrapper.text()).not.toContain('Logout')
+  })
+
+  it('displays user email and logout button when logged in', async () => {
+    mockIsLoggedIn.value = true
+    mockUser.value = { email: 'test@example.com' } as User
+
+    const wrapper = await mountSuspended(app)
+
+    expect(wrapper.text()).toContain('test@example.com')
+    expect(wrapper.text()).toContain('Logout')
+    expect(wrapper.text()).not.toContain('Login')
+    expect(wrapper.text()).not.toContain('Register')
+  })
+
+  it('calls logout when logout button is clicked', async () => {
+    mockIsLoggedIn.value = true
+    mockUser.value = { email: 'test@example.com' } as User
+
+    const wrapper = await mountSuspended(app)
+
+    const logoutButton = wrapper
+      .findAll('button')
+      .find(btn => btn.text() === 'Logout')
+    expect(logoutButton).toBeDefined()
+    await logoutButton?.trigger('click')
+
+    expect(mockLogout).toHaveBeenCalled()
   })
 })
