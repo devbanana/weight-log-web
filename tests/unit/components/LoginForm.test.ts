@@ -98,4 +98,130 @@ describe('LoginForm.vue', () => {
 
     expect(submitButton.text()).toContain('Login')
   })
+
+  it('should show validation error when email is empty', async () => {
+    // Mock login to throw validation error for missing email
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 422,
+      data: {
+        message: 'The email field is required.',
+        errors: {
+          email: ['The email field is required.']
+        }
+      }
+    })
+
+    const wrapper = await mountSuspended(LoginForm)
+
+    // Try to submit with only password filled
+    await wrapper.find('input[type="password"]').setValue('password123')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    // Should call login and show validation error from API
+    expect(mockLogin).toHaveBeenCalledWith({
+      email: '',
+      password: 'password123'
+    })
+    expect(wrapper.html()).toContain('email field is required')
+  })
+
+  it('should show validation error when password is empty', async () => {
+    // Mock login to throw validation error for missing password
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 422,
+      data: {
+        message: 'The password field is required.',
+        errors: {
+          password: ['The password field is required.']
+        }
+      }
+    })
+
+    const wrapper = await mountSuspended(LoginForm)
+
+    // Try to submit with only email filled
+    await wrapper.find('input[type="email"]').setValue('test@example.com')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    // Should call login and show validation error from API
+    expect(mockLogin).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      password: ''
+    })
+    expect(wrapper.html()).toContain('password field is required')
+  })
+
+  it('should show validation errors when both fields are empty', async () => {
+    // Mock login to throw validation error for both fields
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 422,
+      data: {
+        message: 'The email field is required. (and 1 more error)',
+        errors: {
+          email: ['The email field is required.'],
+          password: ['The password field is required.']
+        }
+      }
+    })
+
+    const wrapper = await mountSuspended(LoginForm)
+
+    // Try to submit with empty fields
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    // Should call login and show validation errors from API
+    expect(mockLogin).toHaveBeenCalledWith({
+      email: '',
+      password: ''
+    })
+    expect(wrapper.html()).toContain('email field is required')
+  })
+
+  it('should clear previous validation errors on retry', async () => {
+    // First attempt fails with email error
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 422,
+      data: {
+        message: 'The email field is required.',
+        errors: {
+          email: ['The email field is required.']
+        }
+      }
+    })
+
+    const wrapper = await mountSuspended(LoginForm)
+
+    // Submit first time with invalid data
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    // Should show validation error
+    const htmlAfterFirstSubmit = wrapper.html()
+    expect(htmlAfterFirstSubmit).toContain('email field is required')
+
+    // Second attempt also fails with a different error
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 422,
+      data: {
+        message: 'The password is too short.',
+        errors: {
+          password: ['The password is too short.']
+        }
+      }
+    })
+
+    // Fill in email but use short password
+    await wrapper.find('input[type="email"]').setValue('valid@example.com')
+    await wrapper.find('input[type="password"]').setValue('123')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    // Should show new error but NOT the old email error
+    const htmlAfterSecondSubmit = wrapper.html()
+    expect(htmlAfterSecondSubmit).not.toContain('email field is required')
+    expect(htmlAfterSecondSubmit).toContain('password is too short')
+  })
 })
