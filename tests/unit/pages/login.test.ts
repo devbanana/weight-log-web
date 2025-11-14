@@ -11,10 +11,20 @@ vi.mock('~/components/LoginForm.vue', () => ({
 }))
 
 describe('login.vue', () => {
-  it('should show an h1 with the correct text', async () => {
+  it('should show an h1 containing "Login"', async () => {
     const wrapper = await mountSuspended(LoginPage)
 
-    expect(wrapper.find('h1').text()).toBe('Log in to your account')
+    const h1 = wrapper.find('h1')
+    expect(h1.exists()).toBe(true)
+    expect(h1.text()).toContain('Login')
+  })
+
+  it('should display the page description', async () => {
+    const wrapper = await mountSuspended(LoginPage)
+
+    expect(wrapper.text()).toContain(
+      'Sign in to track your weight and view your progress.'
+    )
   })
 
   it('should render the login form', async () => {

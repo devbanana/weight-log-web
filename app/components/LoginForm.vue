@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { Form, FormError } from '#ui/types'
+import type { AuthFormField, Form, FormError, FormSubmitEvent } from '#ui/types'
 
+import { UAuthForm } from '#components'
 import { useToast } from '#ui/composables/useToast'
-import { reactive, ref } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 
 import { useAuth } from '~/composables/useAuth'
 import { isApiError } from '~/utils/api-error'
@@ -12,20 +13,41 @@ interface LoginState {
   password: string
 }
 
-const state = reactive<LoginState>({
-  email: '',
-  password: ''
-})
+interface AuthFormInstance {
+  formRef: Form<LoginState>
+  state: LoginState
+}
+
+const fields: AuthFormField[] = [
+  {
+    name: 'email',
+    type: 'email',
+    label: 'Email',
+    placeholder: 'Enter your email',
+    required: true,
+    defaultValue: ''
+  },
+  {
+    name: 'password',
+    label: 'Password',
+    type: 'password',
+    placeholder: 'Enter your password',
+    required: true,
+    defaultValue: ''
+  }
+]
 
 const pending = ref(false)
-const form = ref<Form<LoginState>>()
+const form = useTemplateRef<AuthFormInstance>('login-form')
 const { login } = useAuth()
 
-const onLogin = async (): Promise<void> => {
+const onSubmit = async (
+  payload: FormSubmitEvent<LoginState>
+): Promise<void> => {
   pending.value = true
 
   try {
-    await login(state)
+    await login(payload.data)
   } catch (error) {
     // Handle 422 validation errors with field-specific errors
     if (isApiError(error) && error.statusCode === 422 && error.data?.errors) {
@@ -40,7 +62,7 @@ const onLogin = async (): Promise<void> => {
         }
       }
 
-      form.value?.setErrors(errors)
+      form.value?.formRef.setErrors(errors)
     } else {
       // Handle all other errors (422 with message only, non-422 errors, etc.)
       const errorMessage
@@ -62,39 +84,11 @@ const onLogin = async (): Promise<void> => {
 </script>
 
 <template>
-  <UForm
-    ref="form"
-    :state="state"
-    class="space-y-4"
-    @submit.prevent="onLogin"
-  >
-    <UFormField
-      label="Email"
-      name="email"
-      required
-    >
-      <UInput
-        v-model="state.email"
-        type="email"
-      />
-    </UFormField>
-
-    <UFormField
-      label="Password"
-      name="password"
-      required
-    >
-      <UInput
-        v-model="state.password"
-        type="password"
-      />
-    </UFormField>
-
-    <UButton
-      type="submit"
-      :disabled="pending"
-      label="Login"
-      block
-    />
-  </UForm>
+  <UAuthForm
+    ref="login-form"
+    :fields="fields"
+    :loading="pending"
+    :submit="{ label: 'Login' }"
+    @submit="onSubmit"
+  />
 </template>

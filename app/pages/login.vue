@@ -10,14 +10,14 @@ definePageMeta({
 
 <template>
   <UContainer class="py-12">
-    <UCard class="max-w-lg mx-auto">
-      <template #header>
-        <h1 class="text-xl font-bold text-center">
-          Log in to your account
-        </h1>
+    <UPageCard
+      class="w-full max-w-md"
+      description="Sign in to track your weight and view your progress."
+    >
+      <template #title>
+        <h1>Login to Your Account</h1>
       </template>
-
       <LoginForm />
-    </UCard>
+    </UPageCard>
   </UContainer>
 </template>
