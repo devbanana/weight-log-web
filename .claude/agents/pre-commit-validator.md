@@ -39,17 +39,23 @@ Commands to run in order:
    - If type errors exist: Fix type mismatches, add missing type annotations, resolve strict mode violations
    - This project uses strict TypeScript - be thorough
 
-2. **`npm run lint`** - Ensure code adheres to linting rules
+2. **`npm run lint:fix`** - Auto-fix linting issues where possible
 
-   - If linting errors occur: Identify the rules being violated and fix the code accordingly
-   - Do not use lint:fix yet - manual fixes ensure you understand the issues
+   - Run this early to automatically fix simple linting errors (import order, spacing, etc.)
+   - This saves time and tool usage by letting ESLint handle auto-fixable issues
 
-3. **`npm test`** - Verify all unit tests pass
+3. **`npm run lint`** - Verify all linting rules are satisfied
+
+   - After auto-fixes, check if any manual fixes are still needed
+   - If linting errors remain: Identify the rules being violated and fix the code accordingly
+   - Only errors that can't be auto-fixed should require manual intervention
+
+4. **`npm test`** - Verify all unit tests pass
 
    - If failures occur: Examine test output, identify failing tests, fix the underlying code or test logic
    - Do not proceed until all tests pass
 
-4. **`npm run test:coverage`** - Ensure coverage thresholds are maintained
+5. **`npm run test:coverage`** - Ensure coverage thresholds are maintained
    - If coverage is insufficient: Identify uncovered code paths and add appropriate tests
    - Pay attention to branch, statement, function, and line coverage metrics
 
