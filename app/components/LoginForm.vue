@@ -27,15 +27,14 @@ const onLogin = async (): Promise<void> => {
   try {
     await login(state)
   } catch (error) {
-    const toast = useToast()
+    // Handle 422 validation errors with field-specific errors
     if (isApiError(error) && error.statusCode === 422 && error.data?.errors) {
       const errors: FormError[] = []
-      const apiErrors = error.data.errors
-      for (const [key, fieldErrors] of Object.entries(apiErrors)) {
+      for (const [name, fieldErrors] of Object.entries(error.data.errors)) {
         // Loop through each error message for the field
         for (const message of fieldErrors) {
           errors.push({
-            name: key,
+            name,
             message
           })
         }
@@ -43,10 +42,15 @@ const onLogin = async (): Promise<void> => {
 
       form.value?.setErrors(errors)
     } else {
-      console.error(error)
-      toast.add({
-        title: 'Unknown Error',
-        description: 'An unexpected error occurred. Please try again.',
+      // Handle all other errors (422 with message only, non-422 errors, etc.)
+      const errorMessage
+        = isApiError(error) && error.data?.message
+          ? error.data.message
+          : 'An unexpected error occurred. Please try again.'
+
+      useToast().add({
+        title: 'Error',
+        description: errorMessage,
         color: 'error',
         icon: 'i-lucide-circle-x'
       })

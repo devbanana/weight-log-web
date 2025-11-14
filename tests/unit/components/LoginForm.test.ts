@@ -1,3 +1,4 @@
+import { useToast } from '#ui/composables/useToast'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -223,5 +224,62 @@ describe('LoginForm.vue', () => {
     const htmlAfterSecondSubmit = wrapper.html()
     expect(htmlAfterSecondSubmit).not.toContain('email field is required')
     expect(htmlAfterSecondSubmit).toContain('password is too short')
+  })
+
+  it('should show toast when 422 error has message but no error fields', async () => {
+    const mockToast = { add: vi.fn() }
+    vi.mocked(useToast).mockReturnValue(mockToast as never)
+
+    // Mock login to throw 422 with message but no errors field
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 422,
+      data: {
+        message: 'Too many login attempts. Please try again later.'
+      }
+    })
+
+    const wrapper = await mountSuspended(LoginForm)
+
+    await wrapper.find('input[type="email"]').setValue('test@example.com')
+    await wrapper.find('input[type="password"]').setValue('password123')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    // Should show toast with the API message
+    expect(mockToast.add).toHaveBeenCalledWith({
+      title: 'Error',
+      description: 'Too many login attempts. Please try again later.',
+      color: 'error',
+      icon: 'i-lucide-circle-x'
+    })
+
+    // Should NOT show inline field errors
+    expect(wrapper.html()).not.toContain('Too many login attempts')
+  })
+
+  it('should show generic error toast for non-422 errors without message', async () => {
+    const mockToast = { add: vi.fn() }
+    vi.mocked(useToast).mockReturnValue(mockToast as never)
+
+    // Mock login to throw a non-422 error without a message
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 500,
+      data: {}
+    })
+
+    const wrapper = await mountSuspended(LoginForm)
+
+    await wrapper.find('input[type="email"]').setValue('test@example.com')
+    await wrapper.find('input[type="password"]').setValue('password123')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    // Should show toast with generic fallback message
+    expect(mockToast.add).toHaveBeenCalledWith({
+      title: 'Error',
+      description: 'An unexpected error occurred. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-circle-x'
+    })
   })
 })
