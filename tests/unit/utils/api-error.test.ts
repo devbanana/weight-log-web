@@ -105,8 +105,8 @@ describe('isApiError', () => {
 
     if (isApiError(error)) {
       // Type should be narrowed to FetchError<ApiError>
-      expect(error.data.message).toBe('Test error')
-      expect(error.data.errors?.field).toEqual(['Error message'])
+      expect(error.data?.message).toBe('Test error')
+      expect(error.data?.errors?.field).toEqual(['Error message'])
     } else {
       throw new Error('Should be ApiError')
     }
