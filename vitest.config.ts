@@ -15,8 +15,8 @@ export default defineVitestConfig({
       reporter: ['text', 'json', 'html'],
       thresholds: {
         lines: 70,
-        functions: 50,
-        branches: 80,
+        functions: 60,
+        branches: 90,
         statements: 70
       },
       exclude: [
