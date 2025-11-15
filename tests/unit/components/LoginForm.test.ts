@@ -1,4 +1,3 @@
-import { useToast } from '#ui/composables/useToast'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -6,21 +5,15 @@ import { nextTick } from 'vue'
 
 import LoginForm from '~/components/LoginForm.vue'
 import { useAuth } from '~/composables/useAuth'
-import { isApiError } from '~/utils/api-error'
+import { useFormErrors } from '~/composables/useFormErrors'
 
 // Mock composables
 vi.mock('~/composables/useAuth')
-
-vi.mock('#ui/composables/useToast', () => ({
-  useToast: vi.fn()
-}))
-
-vi.mock('~/utils/api-error', () => ({
-  isApiError: vi.fn()
-}))
+vi.mock('~/composables/useFormErrors')
 
 describe('LoginForm.vue', () => {
   const mockLogin = vi.fn()
+  const mockHandleError = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -30,6 +23,10 @@ describe('LoginForm.vue', () => {
       login: mockLogin,
       logout: vi.fn()
     } satisfies ReturnType<typeof useAuth>)
+
+    vi.mocked(useFormErrors).mockReturnValue({
+      handleError: mockHandleError
+    })
   })
 
   it('should render the login form', async () => {
@@ -154,12 +151,8 @@ describe('LoginForm.vue', () => {
     expect(html).toContain('Password is required')
   })
 
-  it('should show server-side validation error for invalid credentials', async () => {
-    // Mock isApiError to return true for this API error
-    vi.mocked(isApiError).mockReturnValue(true)
-
-    // Mock login to throw validation error for invalid credentials
-    mockLogin.mockRejectedValueOnce({
+  it('should call handleError when login fails', async () => {
+    const error = {
       statusCode: 422,
       data: {
         message: 'These credentials do not match our records.',
@@ -167,7 +160,9 @@ describe('LoginForm.vue', () => {
           email: ['These credentials do not match our records.']
         }
       }
-    })
+    }
+
+    mockLogin.mockRejectedValueOnce(error)
 
     const wrapper = await mountSuspended(LoginForm)
 
@@ -183,120 +178,7 @@ describe('LoginForm.vue', () => {
       password: 'wrongpassword'
     })
 
-    // Should show server-side validation error
-    expect(wrapper.html()).toContain(
-      'These credentials do not match our records.'
-    )
-  })
-
-  it('should clear previous validation errors on retry', async () => {
-    // Mock isApiError to return true for API errors
-    vi.mocked(isApiError).mockReturnValue(true)
-
-    // First attempt fails with email error
-    mockLogin.mockRejectedValueOnce({
-      statusCode: 422,
-      data: {
-        message: 'This email is not registered.',
-        errors: {
-          email: ['This email is not registered.']
-        }
-      }
-    })
-
-    const wrapper = await mountSuspended(LoginForm)
-
-    // Submit first time with valid-looking data
-    await wrapper.find('input[type="email"]').setValue('notfound@example.com')
-    await wrapper.find('input[type="password"]').setValue('password123')
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    // Should show server validation error
-    expect(wrapper.html()).toContain('email is not registered')
-
-    // Second attempt also fails with a different error
-    mockLogin.mockRejectedValueOnce({
-      statusCode: 422,
-      data: {
-        message: 'Invalid password.',
-        errors: {
-          password: ['Invalid password.']
-        }
-      }
-    })
-
-    // Try different credentials
-    await wrapper.find('input[type="email"]').setValue('valid@example.com')
-    await wrapper.find('input[type="password"]').setValue('wrongpass')
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    // Should show new error but NOT the old email error
-    expect(wrapper.html()).not.toContain('email is not registered')
-    expect(wrapper.html()).toContain('Invalid password')
-  })
-
-  it('should show toast when 422 error has message but no error fields', async () => {
-    // Mock isApiError to return true (has data.message)
-    vi.mocked(isApiError).mockReturnValue(true)
-
-    const mockToast = { add: vi.fn() }
-    vi.mocked(useToast).mockReturnValue(mockToast as never)
-
-    // Mock login to throw 422 with message but no errors field
-    mockLogin.mockRejectedValueOnce({
-      statusCode: 422,
-      data: {
-        message: 'Too many login attempts. Please try again later.'
-      }
-    })
-
-    const wrapper = await mountSuspended(LoginForm)
-
-    await wrapper.find('input[type="email"]').setValue('test@example.com')
-    await wrapper.find('input[type="password"]').setValue('password123')
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    // Should show toast with the API message
-    expect(mockToast.add).toHaveBeenCalledWith({
-      title: 'Error',
-      description: 'Too many login attempts. Please try again later.',
-      color: 'error',
-      icon: 'i-lucide-circle-x'
-    })
-
-    // Should NOT show inline field errors
-    expect(wrapper.html()).not.toContain('Too many login attempts')
-  })
-
-  it('should show generic error toast for non-422 errors without message', async () => {
-    // Mock isApiError to return false (not a properly structured API error)
-    vi.mocked(isApiError).mockReturnValue(false)
-
-    const mockToast = { add: vi.fn() }
-    vi.mocked(useToast).mockReturnValue(mockToast as never)
-
-    // Mock login to throw a non-422 error without a message
-    mockLogin.mockRejectedValueOnce({
-      statusCode: 500,
-      data: {}
-    })
-
-    const wrapper = await mountSuspended(LoginForm)
-
-    await wrapper.find('input[type="email"]').setValue('test@example.com')
-    await wrapper.find('input[type="password"]').setValue('password123')
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    // Should show toast with generic fallback message
-    expect(mockToast.add).toHaveBeenCalledWith({
-      title: 'Error',
-      description: 'An unexpected error occurred. Please try again.',
-      color: 'error',
-      icon: 'i-lucide-circle-x'
-    })
+    // Should call handleError with the error
+    expect(mockHandleError).toHaveBeenCalledWith(error)
   })
 })
