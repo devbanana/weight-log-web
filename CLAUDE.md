@@ -114,13 +114,11 @@ try {
 Three-layer system for API calls:
 
 1. **`$fetch` instance** (`app/plugins/api.ts`):
-
    - Custom fetch with CSRF, auth, error handling
    - Base URL from `NUXT_PUBLIC_API_BASE` env var
    - Provided globally as `$api`
 
 2. **`useAPI` composable** (`app/composables/useAPI.ts`):
-
    - Wrapper around `useFetch` using custom `$api`
    - Returns reactive state (pending, error, data)
    - Fully typed with TypeScript generics

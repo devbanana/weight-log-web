@@ -35,23 +35,19 @@ Run each command sequentially. If ANY command fails, you must:
 Commands to run in order:
 
 1. **`npm run typecheck`** - Validate TypeScript type safety
-
    - If type errors exist: Fix type mismatches, add missing type annotations, resolve strict mode violations
    - This project uses strict TypeScript - be thorough
 
 2. **`npm run lint:fix`** - Auto-fix linting issues where possible
-
    - Run this early to automatically fix simple linting errors (import order, spacing, etc.)
    - This saves time and tool usage by letting ESLint handle auto-fixable issues
 
 3. **`npm run lint`** - Verify all linting rules are satisfied
-
    - After auto-fixes, check if any manual fixes are still needed
    - If linting errors remain: Identify the rules being violated and fix the code accordingly
    - Only errors that can't be auto-fixed should require manual intervention
 
 4. **`npm test`** - Verify all unit tests pass
-
    - If failures occur: Examine test output, identify failing tests, fix the underlying code or test logic
    - Do not proceed until all tests pass
 
@@ -64,7 +60,6 @@ Commands to run in order:
 Once ALL Phase 1 checks pass, run these commands in exact order:
 
 1. **`npm run format:fix`** (Prettier formatting)
-
    - This MUST run before lint:fix
    - Prettier will format code according to project standards
 
