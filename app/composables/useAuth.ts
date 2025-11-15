@@ -1,3 +1,4 @@
+import type { LoginCredentials } from '~/types/auth'
 import type { User } from '~/types/user'
 
 import { navigateTo, useNuxtApp, useRoute } from '#app'
@@ -7,11 +8,6 @@ import { useUser } from '~/composables/useUser'
 interface AuthInfo {
   login: (credentials: LoginCredentials) => Promise<void>
   logout: () => Promise<void>
-}
-
-interface LoginCredentials {
-  email: string
-  password: string
 }
 
 export const useAuth = (): AuthInfo => {

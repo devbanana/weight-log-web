@@ -15,7 +15,7 @@ definePageMeta({
       description="Sign in to track your weight and view your progress."
     >
       <template #title>
-        <h1>Login to Your Account</h1>
+        <h1>Login</h1>
       </template>
       <LoginForm />
     </UPageCard>

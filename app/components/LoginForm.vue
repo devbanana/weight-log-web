@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import type { AuthFormField, Form, FormError, FormSubmitEvent } from '#ui/types'
+import type { AuthFormField, FormError, FormSubmitEvent } from '#ui/types'
+import type { LoginCredentials } from '~/types/auth'
+import type { AuthFormInstance } from '~/types/forms'
 
 import { UAuthForm } from '#components'
 import { useToast } from '#ui/composables/useToast'
 import { ref, useTemplateRef } from 'vue'
+import { z } from 'zod'
 
 import { useAuth } from '~/composables/useAuth'
 import { isApiError } from '~/utils/api-error'
 
-interface LoginState {
-  email: string
-  password: string
-}
-
-interface AuthFormInstance {
-  formRef: Form<LoginState>
-  state: LoginState
-}
+const schema = z.object({
+  email: z.email('Invalid email address'),
+  password: z.string().min(1, 'Password is required')
+})
 
 const fields: AuthFormField[] = [
   {
@@ -38,11 +36,11 @@ const fields: AuthFormField[] = [
 ]
 
 const pending = ref(false)
-const form = useTemplateRef<AuthFormInstance>('login-form')
+const form = useTemplateRef<AuthFormInstance<LoginCredentials>>('login-form')
 const { login } = useAuth()
 
 const onSubmit = async (
-  payload: FormSubmitEvent<LoginState>
+  payload: FormSubmitEvent<LoginCredentials>
 ): Promise<void> => {
   pending.value = true
 
@@ -87,6 +85,7 @@ const onSubmit = async (
   <UAuthForm
     ref="login-form"
     :fields="fields"
+    :schema="schema"
     :loading="pending"
     :submit="{ label: 'Login' }"
     @submit="onSubmit"

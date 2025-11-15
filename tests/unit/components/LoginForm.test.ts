@@ -6,12 +6,17 @@ import { nextTick } from 'vue'
 
 import LoginForm from '~/components/LoginForm.vue'
 import { useAuth } from '~/composables/useAuth'
+import { isApiError } from '~/utils/api-error'
 
 // Mock composables
 vi.mock('~/composables/useAuth')
 
 vi.mock('#ui/composables/useToast', () => ({
   useToast: vi.fn()
+}))
+
+vi.mock('~/utils/api-error', () => ({
+  isApiError: vi.fn()
 }))
 
 describe('LoginForm.vue', () => {
@@ -24,7 +29,7 @@ describe('LoginForm.vue', () => {
     vi.mocked(useAuth).mockReturnValue({
       login: mockLogin,
       logout: vi.fn()
-    })
+    } satisfies ReturnType<typeof useAuth>)
   })
 
   it('should render the login form', async () => {
@@ -42,7 +47,8 @@ describe('LoginForm.vue', () => {
 
     await wrapper.find('input[type="email"]').setValue('test@example.com')
     await wrapper.find('input[type="password"]').setValue('password123')
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
 
     expect(mockLogin).toHaveBeenCalledWith({
       email: 'test@example.com',
@@ -69,7 +75,8 @@ describe('LoginForm.vue', () => {
     expect(submitButton.attributes('disabled')).toBeUndefined()
 
     // Start submit
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
     await nextTick()
 
     // During submit
@@ -100,133 +107,140 @@ describe('LoginForm.vue', () => {
     expect(submitButton.text()).toContain('Login')
   })
 
-  it('should show validation error when email is empty', async () => {
-    // Mock login to throw validation error for missing email
-    mockLogin.mockRejectedValueOnce({
-      statusCode: 422,
-      data: {
-        message: 'The email field is required.',
-        errors: {
-          email: ['The email field is required.']
-        }
-      }
-    })
-
+  it('should show client-side validation error for invalid email', async () => {
     const wrapper = await mountSuspended(LoginForm)
 
-    // Try to submit with only password filled
+    // Try to submit with invalid email
+    await wrapper.find('input[type="email"]').setValue('invalid-email')
     await wrapper.find('input[type="password"]').setValue('password123')
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    // Should call login and show validation error from API
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: '',
-      password: 'password123'
-    })
-    expect(wrapper.html()).toContain('email field is required')
+    // Should NOT call login - client-side validation prevents submission
+    expect(mockLogin).not.toHaveBeenCalled()
+
+    // Should show client-side validation error
+    expect(wrapper.html()).toContain('Invalid email address')
   })
 
-  it('should show validation error when password is empty', async () => {
-    // Mock login to throw validation error for missing password
-    mockLogin.mockRejectedValueOnce({
-      statusCode: 422,
-      data: {
-        message: 'The password field is required.',
-        errors: {
-          password: ['The password field is required.']
-        }
-      }
-    })
-
+  it('should show client-side validation error for empty password', async () => {
     const wrapper = await mountSuspended(LoginForm)
 
-    // Try to submit with only email filled
+    // Try to submit with empty password
     await wrapper.find('input[type="email"]').setValue('test@example.com')
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    // Should call login and show validation error from API
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      password: ''
-    })
-    expect(wrapper.html()).toContain('password field is required')
+    // Should NOT call login - client-side validation prevents submission
+    expect(mockLogin).not.toHaveBeenCalled()
+
+    // Should show client-side validation error
+    expect(wrapper.html()).toContain('Password is required')
   })
 
-  it('should show validation errors when both fields are empty', async () => {
-    // Mock login to throw validation error for both fields
-    mockLogin.mockRejectedValueOnce({
-      statusCode: 422,
-      data: {
-        message: 'The email field is required. (and 1 more error)',
-        errors: {
-          email: ['The email field is required.'],
-          password: ['The password field is required.']
-        }
-      }
-    })
-
+  it('should show client-side validation errors for both fields', async () => {
     const wrapper = await mountSuspended(LoginForm)
 
     // Try to submit with empty fields
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    // Should call login and show validation errors from API
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: '',
-      password: ''
+    // Should NOT call login - client-side validation prevents submission
+    expect(mockLogin).not.toHaveBeenCalled()
+
+    // Should show both validation errors
+    const html = wrapper.html()
+    expect(html).toContain('Invalid email address')
+    expect(html).toContain('Password is required')
+  })
+
+  it('should show server-side validation error for invalid credentials', async () => {
+    // Mock isApiError to return true for this API error
+    vi.mocked(isApiError).mockReturnValue(true)
+
+    // Mock login to throw validation error for invalid credentials
+    mockLogin.mockRejectedValueOnce({
+      statusCode: 422,
+      data: {
+        message: 'These credentials do not match our records.',
+        errors: {
+          email: ['These credentials do not match our records.']
+        }
+      }
     })
-    expect(wrapper.html()).toContain('email field is required')
+
+    const wrapper = await mountSuspended(LoginForm)
+
+    // Submit with valid-looking data that passes client-side validation
+    await wrapper.find('input[type="email"]').setValue('test@example.com')
+    await wrapper.find('input[type="password"]').setValue('wrongpassword')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    // Should call login with valid data
+    expect(mockLogin).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      password: 'wrongpassword'
+    })
+
+    // Should show server-side validation error
+    expect(wrapper.html()).toContain(
+      'These credentials do not match our records.'
+    )
   })
 
   it('should clear previous validation errors on retry', async () => {
+    // Mock isApiError to return true for API errors
+    vi.mocked(isApiError).mockReturnValue(true)
+
     // First attempt fails with email error
     mockLogin.mockRejectedValueOnce({
       statusCode: 422,
       data: {
-        message: 'The email field is required.',
+        message: 'This email is not registered.',
         errors: {
-          email: ['The email field is required.']
+          email: ['This email is not registered.']
         }
       }
     })
 
     const wrapper = await mountSuspended(LoginForm)
 
-    // Submit first time with invalid data
-    await wrapper.find('form').trigger('submit.prevent')
+    // Submit first time with valid-looking data
+    await wrapper.find('input[type="email"]').setValue('notfound@example.com')
+    await wrapper.find('input[type="password"]').setValue('password123')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    // Should show validation error
-    const htmlAfterFirstSubmit = wrapper.html()
-    expect(htmlAfterFirstSubmit).toContain('email field is required')
+    // Should show server validation error
+    expect(wrapper.html()).toContain('email is not registered')
 
     // Second attempt also fails with a different error
     mockLogin.mockRejectedValueOnce({
       statusCode: 422,
       data: {
-        message: 'The password is too short.',
+        message: 'Invalid password.',
         errors: {
-          password: ['The password is too short.']
+          password: ['Invalid password.']
         }
       }
     })
 
-    // Fill in email but use short password
+    // Try different credentials
     await wrapper.find('input[type="email"]').setValue('valid@example.com')
-    await wrapper.find('input[type="password"]').setValue('123')
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('input[type="password"]').setValue('wrongpass')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
     // Should show new error but NOT the old email error
-    const htmlAfterSecondSubmit = wrapper.html()
-    expect(htmlAfterSecondSubmit).not.toContain('email field is required')
-    expect(htmlAfterSecondSubmit).toContain('password is too short')
+    expect(wrapper.html()).not.toContain('email is not registered')
+    expect(wrapper.html()).toContain('Invalid password')
   })
 
   it('should show toast when 422 error has message but no error fields', async () => {
+    // Mock isApiError to return true (has data.message)
+    vi.mocked(isApiError).mockReturnValue(true)
+
     const mockToast = { add: vi.fn() }
     vi.mocked(useToast).mockReturnValue(mockToast as never)
 
@@ -242,7 +256,7 @@ describe('LoginForm.vue', () => {
 
     await wrapper.find('input[type="email"]').setValue('test@example.com')
     await wrapper.find('input[type="password"]').setValue('password123')
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
     // Should show toast with the API message
@@ -258,6 +272,9 @@ describe('LoginForm.vue', () => {
   })
 
   it('should show generic error toast for non-422 errors without message', async () => {
+    // Mock isApiError to return false (not a properly structured API error)
+    vi.mocked(isApiError).mockReturnValue(false)
+
     const mockToast = { add: vi.fn() }
     vi.mocked(useToast).mockReturnValue(mockToast as never)
 
@@ -271,7 +288,7 @@ describe('LoginForm.vue', () => {
 
     await wrapper.find('input[type="email"]').setValue('test@example.com')
     await wrapper.find('input[type="password"]').setValue('password123')
-    await wrapper.find('form').trigger('submit.prevent')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
     // Should show toast with generic fallback message
